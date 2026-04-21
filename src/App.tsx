@@ -65,36 +65,87 @@ const SERVICES = [
   }
 ];
 
-const PROJECTS = [
+interface ProjectDetail {
+  title: string;
+  location: string;
+  category: string;
+  image: string;
+  description: string;
+  additionalImages: string[];
+  specs: { label: string; value: string }[];
+}
+
+const PROJECTS: ProjectDetail[] = [
   {
     title: 'Lekki Waterfront Manor',
     location: 'Plot 15, Admiralty Way, Lekki Phase 1, Lagos',
     category: 'Luxury Residential',
-    image: 'https://picsum.photos/seed/nigeria-house-1/800/600'
+    image: 'https://picsum.photos/seed/nigeria-house-1/1200/800',
+    description: 'A masterpiece of contemporary coastal architecture. This 6-bedroom smart manor features state-of-the-art structural reinforcements to withstand marine environments while maintaining a seamless glass-to-concrete aesthetic.',
+    additionalImages: [
+      'https://picsum.photos/seed/waterfront-int-1/800/600',
+      'https://picsum.photos/seed/waterfront-ext-2/800/600'
+    ],
+    specs: [
+      { label: 'Total Area', value: '850 m²' },
+      { label: 'Completion', value: 'Dec 2024' },
+      { label: 'Engineers', value: 'Bigson & Team' }
+    ]
   },
   {
     title: 'Maitama Diplomatic Villa',
     location: 'No. 42 Gana Street, Maitama, Abuja',
     category: 'Elite Estate',
-    image: 'https://picsum.photos/seed/nigeria-house-2/800/600'
+    image: 'https://picsum.photos/seed/nigeria-house-2/1200/800',
+    description: 'Designed for high-profile residents in the heart of Abuja. This villa combines neo-classical proportions with modern structural efficiency, featuring advanced HVAC systems and customized biometric security hollowing.',
+    additionalImages: [
+      'https://picsum.photos/seed/maitama-int-1/800/600',
+      'https://picsum.photos/seed/maitama-ext-2/800/600'
+    ],
+    specs: [
+      { label: 'Total Area', value: '1,200 m²' },
+      { label: 'Completion', value: 'March 2025' },
+      { label: 'Style', value: 'Neo-Classical' }
+    ]
   },
   {
     title: 'Ikeja Heritage Heights',
     location: '24 Oba Akinjobi Way, GRA Ikeja, Lagos',
     category: 'Premium Modern',
-    image: 'https://picsum.photos/seed/nigeria-house-3/800/600'
+    image: 'https://picsum.photos/seed/nigeria-house-3/1200/800',
+    description: 'A modular living project that prioritizes natural light and vertical ventilation. This structure utilizes high-tensile steel framing to produce expansive open-plan interiors without compromising load-bearing integrity.',
+    additionalImages: [
+      'https://picsum.photos/seed/ikeja-int-1/800/600',
+      'https://picsum.photos/seed/ikeja-ext-2/800/600'
+    ],
+    specs: [
+      { label: 'Total Area', value: '620 m²' },
+      { label: 'Duration', value: '14 Months' },
+      { label: 'System', value: 'Steel Frame' }
+    ]
   },
   {
     title: 'Amen Eco-Estates',
     location: 'Lekki-Epe Expressway, Ibeju-Lekki, Lagos',
     category: 'Sustainable Living',
-    image: 'https://picsum.photos/seed/nigeria-house-4/800/600'
+    image: 'https://picsum.photos/seed/nigeria-house-4/1200/800',
+    description: 'Leading the way in Nigerian green construction. These estates incorporate solar-integrated roofing and greywater recycling systems, all supported by B Tech’s proprietary eco-structural foundations.',
+    additionalImages: [
+      'https://picsum.photos/seed/eco-int-1/800/600',
+      'https://picsum.photos/seed/eco-ext-2/800/600'
+    ],
+    specs: [
+      { label: 'Energy', value: '70% Solar' },
+      { label: 'Materials', value: 'Bio-Brick' },
+      { label: 'Status', value: 'Phase 2' }
+    ]
   }
 ];
 
 export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<ProjectDetail | null>(null);
   const [scrolled, setScrolled] = useState(false);
 
   // AI Consultant State
@@ -449,15 +500,18 @@ export default function App() {
                 </div>
                 <div className="p-10">
                   <div className="flex justify-between items-start mb-4">
-                    <div>
+                    <div className="flex-1">
                       <span className="inline-block px-2 py-1 bg-brand-bg text-brand-text text-[8px] font-black uppercase tracking-widest rounded-sm mb-3">
                         {project.category}
                       </span>
                       <h3 className="text-2xl font-black text-slate-900 tracking-tight">{project.title}</h3>
                     </div>
-                    <div className="w-12 h-12 bg-slate-900 text-brand flex items-center justify-center rounded-sm transition-transform hover:rotate-45">
+                    <button 
+                      onClick={() => setSelectedProject(project)}
+                      className="w-12 h-12 bg-slate-900 text-brand flex items-center justify-center rounded-sm transition-transform hover:rotate-45"
+                    >
                       <ArrowRight className="w-6 h-6" />
-                    </div>
+                    </button>
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
                     <MapPin className="w-4 h-4 text-brand" /> {project.location}
@@ -468,6 +522,96 @@ export default function App() {
           </div>
         </div>
       </section>
+
+      {/* Project Detail Modal */}
+      <AnimatePresence>
+        {selectedProject && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedProject(null)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100]"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed inset-4 md:inset-10 lg:inset-20 bg-white z-[110] shadow-2xl rounded-sm overflow-hidden flex flex-col md:flex-row"
+            >
+              <div className="w-full md:w-1/2 h-64 md:h-full relative bg-slate-100">
+                <img 
+                  src={selectedProject.image} 
+                  alt={selectedProject.title} 
+                   className="w-full h-full object-cover"
+                   referrerPolicy="no-referrer"
+                />
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="absolute top-4 left-4 bg-white/90 text-slate-900 p-2 rounded-sm md:hidden"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 h-full overflow-y-auto p-8 md:p-16 flex flex-col">
+                <div className="flex justify-between items-start mb-8">
+                  <div>
+                    <span className="text-[10px] font-black text-brand uppercase tracking-[0.3em] mb-2 block">{selectedProject.category}</span>
+                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">{selectedProject.title}</h2>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedProject(null)}
+                    className="hidden md:flex p-3 hover:bg-slate-100 rounded-sm transition-colors text-slate-400"
+                  >
+                    <X className="w-8 h-8" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-400 uppercase tracking-widest mb-12 border-b border-slate-100 pb-8">
+                    <MapPin className="w-5 h-5 text-brand" /> {selectedProject.location}
+                </div>
+
+                <div className="bg-slate-50 p-8 rounded-sm mb-12 border-l-4 border-brand">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Project Narrative</h4>
+                    <p className="text-slate-600 leading-relaxed text-lg italic">{selectedProject.description}</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-16">
+                  {selectedProject.specs.map((spec, i) => (
+                    <div key={i} className="p-4 border border-slate-100 bg-white">
+                      <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">{spec.label}</div>
+                      <div className="text-sm font-black text-slate-900 uppercase">{spec.value}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-auto">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Internal Specifications</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      {selectedProject.additionalImages.map((img, i) => (
+                        <div key={i} className="aspect-video rounded-sm overflow-hidden border border-slate-200">
+                          <img 
+                            src={img} 
+                            alt={`Detail ${i}`} 
+                            className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 cursor-pointer"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                </div>
+                
+                <div className="mt-16 pt-8 border-t border-slate-100 flex justify-between items-center">
+                   <button className="btn-primary">Request Similar Specs</button>
+                   <div className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Ref: BT-ARCH-{selectedProject.title.substring(0,3).toUpperCase()}</div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* AI Consultant Trigger */}
       <div className="fixed bottom-8 right-8 z-[60]">
