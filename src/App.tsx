@@ -31,8 +31,15 @@ import {
 import { GoogleGenAI } from "@google/genai";
 import { Blueprint3D } from './components/Blueprint3D';
 
-// Initialize Gemini
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Initialize Gemini lazily to avoid startup crashes on external hosts
+const getAiModel = () => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  const genAi = new GoogleGenAI({ apiKey });
+  return genAi.getGenerativeModel({ model: "gemini-1.5-flash-8b" }); // Using a more stable model name for standard deployments
+};
+
+const aiModel = getAiModel();
 
 const SERVICES = [
   {
@@ -175,6 +182,10 @@ export default function App() {
     setIsLoading(true);
 
     try {
+      if (!aiModel) {
+        throw new Error("API Key missing");
+      }
+
       const prompt = `You are the AI Consultant for "B Tech Construction Ltd", led by the renowned Lead Engineer Bigson. 
       You help potential clients with:
       1. Explaining engineering concepts (structural integrity, soil testing, etc.)
@@ -189,16 +200,12 @@ export default function App() {
       
       User Query: ${userMessage}`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-      });
-
-      const aiResponse = response.text || "I apologize, but I'm having trouble connecting right now. Please contact Engineer Bigson directly at +234 707 046 2347.";
+      const response = await aiModel.generateContent(prompt);
+      const aiResponse = response.response.text() || "I apologize, but I'm having trouble connecting right now. Please contact Engineer Bigson directly at +234 707 046 2347.";
       setChatHistory(prev => [...prev, { role: 'model', content: aiResponse }]);
     } catch (error) {
       console.error("AI Error:", error);
-      setChatHistory(prev => [...prev, { role: 'model', content: "I encountered an error. Please contact our support team directly for assistance." }]);
+      setChatHistory(prev => [...prev, { role: 'model', content: "I encountered an error. This might be due to a missing configuration. Please contact Engineer Bigson directly at +234 707 046 2347 for your inquiry." }]);
     } finally {
       setIsLoading(false);
     }
